@@ -1,8 +1,5 @@
 use macroquad::prelude::*;
-
-const BLOCK_SIZE: f32 = 100f32;
-const BLOCK_PAD: f32 = 5f32;
-const TOTAL_BLOCK_SIZE: f32 = BLOCK_SIZE + BLOCK_PAD;
+use std::cmp::max;
 
 #[derive(Clone, Copy)]
 enum Player {
@@ -36,7 +33,8 @@ fn new_grid() -> Vec<Vec<Slot>> {
     grid
 }
 
-fn get_rect(x: usize, y: usize) -> Rect {
+fn get_rect(x: usize, y: usize, BLOCK_SIZE: f32, BLOCK_PAD: f32) -> Rect {
+    let TOTAL_BLOCK_SIZE = BLOCK_SIZE + BLOCK_PAD;
     Rect::new(
         x as f32 * TOTAL_BLOCK_SIZE
             + (screen_width() - (TOTAL_BLOCK_SIZE * 3f32 - BLOCK_PAD)) * 0.5f32,
@@ -47,7 +45,7 @@ fn get_rect(x: usize, y: usize) -> Rect {
     )
 }
 
-fn draw_outline_rect(x: f32, y: f32, w: f32, h: f32, color: Color) {
+fn draw_outline_rect(x: f32, y: f32, w: f32, h: f32, color: Color, BLOCK_PAD: f32) {
     draw_circle(x, y, BLOCK_PAD * 0.5f32, color);
     draw_circle(x, y + h, BLOCK_PAD * 0.5f32, color);
     draw_circle(x + w, y, BLOCK_PAD * 0.5f32, color);
@@ -60,7 +58,8 @@ fn draw_outline_rect(x: f32, y: f32, w: f32, h: f32, color: Color) {
     draw_line(x, y + h, x + w, y + h, BLOCK_PAD, color);
 }
 
-fn draw_grid(grid: &Vec<Vec<Slot>>, turn: Player) {
+fn draw_grid(grid: &Vec<Vec<Slot>>, turn: Player, BLOCK_SIZE: f32, BLOCK_PAD: f32) {
+    let TOTAL_BLOCK_SIZE = BLOCK_SIZE + BLOCK_PAD;
     for (x, col) in grid.iter().enumerate() {
         for (y, slot) in col.iter().enumerate() {
             match (slot, turn) {
@@ -74,10 +73,11 @@ fn draw_grid(grid: &Vec<Vec<Slot>>, turn: Player) {
                     BLOCK_SIZE,
                     BLOCK_SIZE,
                     BLACK,
+                    BLOCK_PAD,
                 ),
                 _ => (),
             }
-            let rect = get_rect(x, y);
+            let rect = get_rect(x, y, BLOCK_SIZE, BLOCK_PAD);
             draw_rectangle(
                 rect.x,
                 rect.y,
@@ -140,14 +140,24 @@ async fn main() {
     let mut game_state = GameState::Playing;
     let mut turn = Player::X;
 
+    let mut block_size;
+    let mut block_pad;
+
     loop {
+        if screen_width() < screen_height() {
+            block_size = screen_width() * 0.5f32 / 3.1f32;
+            block_pad = screen_width() * 0.5f32 / 0.05f32;
+        } else {
+            block_size = screen_height() * 0.5f32 / 3.1f32;
+            block_pad = screen_height() * 0.5f32 / 0.05f32;
+        }
         match game_state {
             GameState::Playing => {
                 clear_background(match turn {
                     Player::X => RED,
                     Player::O => BLUE,
                 });
-                draw_grid(&grid, turn);
+                draw_grid(&grid, turn, block_size, block_pad);
 
                 if let Some(line) = check_grid(&grid) {
                     if line.x == 0f32 && line.y == 0f32 && line.z == 0f32 && line.w == 0f32 {
@@ -160,7 +170,7 @@ async fn main() {
                 if let Some(pos) = get_pressed() {
                     'x_loop: for x in 0..3 {
                         for y in 0..3 {
-                            let rect = get_rect(x, y);
+                            let rect = get_rect(x, y, block_size, block_pad);
 
                             if rect.x <= pos.x
                                 && pos.x <= (rect.x + rect.w)
@@ -185,12 +195,12 @@ async fn main() {
             }
             GameState::Won(line) => {
                 clear_background(BLACK);
-                draw_grid(&grid, turn);
+                draw_grid(&grid, turn, block_size, block_pad);
 
-                let rect1 = get_rect(line.x as usize, line.y as usize);
+                let rect1 = get_rect(line.x as usize, line.y as usize, block_size, block_pad);
                 let point1 = vec2(rect1.x + rect1.w * 0.5f32, rect1.y + rect1.h * 0.5f32);
 
-                let rect2 = get_rect(line.z as usize, line.w as usize);
+                let rect2 = get_rect(line.z as usize, line.w as usize, block_size, block_pad);
                 let point2 = vec2(rect2.x + rect2.w * 0.5f32, rect2.y + rect2.h * 0.5f32);
 
                 draw_line(
@@ -198,12 +208,12 @@ async fn main() {
                     point1.y,
                     point2.x,
                     point2.y,
-                    BLOCK_SIZE * 0.2f32,
+                    block_size * 0.2f32,
                     WHITE,
                 );
 
-                draw_circle(point1.x, point1.y, BLOCK_SIZE * 0.1f32, WHITE);
-                draw_circle(point2.x, point2.y, BLOCK_SIZE * 0.1f32, WHITE);
+                draw_circle(point1.x, point1.y, block_size * 0.1f32, WHITE);
+                draw_circle(point2.x, point2.y, block_size * 0.1f32, WHITE);
 
                 if let Some(_pos) = get_pressed() {
                     game_state = GameState::Playing;
@@ -213,7 +223,7 @@ async fn main() {
             }
             GameState::Draw => {
                 clear_background(BLACK);
-                draw_grid(&grid, turn);
+                draw_grid(&grid, turn, block_size, block_pad);
 
                 if let Some(_pos) = get_pressed() {
                     game_state = GameState::Playing;
