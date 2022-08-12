@@ -1,5 +1,4 @@
 use macroquad::prelude::*;
-use std::cmp::max;
 
 #[derive(Clone, Copy)]
 enum Player {
@@ -33,51 +32,51 @@ fn new_grid() -> Vec<Vec<Slot>> {
     grid
 }
 
-fn get_rect(x: usize, y: usize, BLOCK_SIZE: f32, BLOCK_PAD: f32) -> Rect {
-    let TOTAL_BLOCK_SIZE = BLOCK_SIZE + BLOCK_PAD;
+fn get_rect(x: usize, y: usize, block_size: f32, block_pad: f32) -> Rect {
+    let total_block_size = block_size + block_pad;
     Rect::new(
-        x as f32 * TOTAL_BLOCK_SIZE
-            + (screen_width() - (TOTAL_BLOCK_SIZE * 3f32 - BLOCK_PAD)) * 0.5f32,
-        y as f32 * TOTAL_BLOCK_SIZE
-            + (screen_height() - (TOTAL_BLOCK_SIZE * 3f32 - BLOCK_PAD)) * 0.5f32,
-        BLOCK_SIZE,
-        BLOCK_SIZE,
+        x as f32 * total_block_size
+            + (screen_width() - (total_block_size * 3f32 - block_pad)) * 0.5f32,
+        y as f32 * total_block_size
+            + (screen_height() - (total_block_size * 3f32 - block_pad)) * 0.5f32,
+        block_size,
+        block_size,
     )
 }
 
-fn draw_outline_rect(x: f32, y: f32, w: f32, h: f32, color: Color, BLOCK_PAD: f32) {
-    draw_circle(x, y, BLOCK_PAD * 0.5f32, color);
-    draw_circle(x, y + h, BLOCK_PAD * 0.5f32, color);
-    draw_circle(x + w, y, BLOCK_PAD * 0.5f32, color);
-    draw_circle(x + w, y + h, BLOCK_PAD * 0.5f32, color);
+fn draw_outline_rect(x: f32, y: f32, w: f32, h: f32, color: Color, block_pad: f32) {
+    draw_circle(x, y, block_pad * 0.5f32, color);
+    draw_circle(x, y + h, block_pad * 0.5f32, color);
+    draw_circle(x + w, y, block_pad * 0.5f32, color);
+    draw_circle(x + w, y + h, block_pad * 0.5f32, color);
 
-    draw_line(x, y, x + w, y, BLOCK_PAD, color);
-    draw_line(x, y, x, y + h, BLOCK_PAD, color);
+    draw_line(x, y, x + w, y, block_pad, color);
+    draw_line(x, y, x, y + h, block_pad, color);
 
-    draw_line(x + w, y, x + w, y + h, BLOCK_PAD, color);
-    draw_line(x, y + h, x + w, y + h, BLOCK_PAD, color);
+    draw_line(x + w, y, x + w, y + h, block_pad, color);
+    draw_line(x, y + h, x + w, y + h, block_pad, color);
 }
 
-fn draw_grid(grid: &Vec<Vec<Slot>>, turn: Player, BLOCK_SIZE: f32, BLOCK_PAD: f32) {
-    let TOTAL_BLOCK_SIZE = BLOCK_SIZE + BLOCK_PAD;
+fn draw_grid(grid: &Vec<Vec<Slot>>, turn: Player, block_size: f32, block_pad: f32) {
+    let total_block_size = block_size + block_pad;
     for (x, col) in grid.iter().enumerate() {
         for (y, slot) in col.iter().enumerate() {
             match (slot, turn) {
                 (Slot::X, Player::X) | (Slot::O, Player::O) => draw_outline_rect(
-                    x as f32 * TOTAL_BLOCK_SIZE
-                        + (screen_width() - (TOTAL_BLOCK_SIZE * grid.len() as f32 - BLOCK_PAD))
+                    x as f32 * total_block_size
+                        + (screen_width() - (total_block_size * grid.len() as f32 - block_pad))
                             * 0.5f32,
-                    y as f32 * TOTAL_BLOCK_SIZE
-                        + (screen_height() - (TOTAL_BLOCK_SIZE * grid.len() as f32 - BLOCK_PAD))
+                    y as f32 * total_block_size
+                        + (screen_height() - (total_block_size * grid.len() as f32 - block_pad))
                             * 0.5f32,
-                    BLOCK_SIZE,
-                    BLOCK_SIZE,
+                    block_size,
+                    block_size,
                     BLACK,
-                    BLOCK_PAD,
+                    block_pad,
                 ),
                 _ => (),
             }
-            let rect = get_rect(x, y, BLOCK_SIZE, BLOCK_PAD);
+            let rect = get_rect(x, y, block_size, block_pad);
             draw_rectangle(
                 rect.x,
                 rect.y,
