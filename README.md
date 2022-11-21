@@ -1,5 +1,7 @@
-# Tic Tac Toe in Rust
+# Rusty Tic Tac Toe
 
-I made tic tac toe in rust, with macroquad, you can find it online at https://pythontttt.herokuapp.com
+I made Tic Tac Toe in Rust, with macroquad, you can find it online at [rusty-tic-tac-toe](https://blockog.itch.io/rusty-tic-tac-toe).
 
-I tried making it work on mobile, but it doesn't :( (the web version)
+This is my first "actual" project I made in rust. (and first itch.io project as well)
+
+I'm pretty sure it works on all devices (web version).

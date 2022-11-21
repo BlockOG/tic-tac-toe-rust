@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use macroquad::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -143,13 +145,15 @@ async fn main() {
     let mut block_pad;
 
     loop {
-        if screen_width() < screen_height() {
-            block_size = screen_width() * 0.5f32 / 3.1f32;
-            block_pad = screen_width() * 0.5f32 / 0.05f32;
-        } else {
-            block_size = screen_height() * 0.5f32 / 3.1f32;
-            block_pad = screen_height() * 0.5f32 / 0.05f32;
-        }
+        let smaller_size = {
+            if screen_width() > screen_height() {
+                screen_height()
+            } else {
+                screen_width()
+            }
+        };
+        block_size = smaller_size * 0.5f32 / 3.1f32;
+        block_pad = smaller_size * 0.5f32 / 50f32;
         match game_state {
             GameState::Playing => {
                 clear_background(match turn {
